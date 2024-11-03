@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/MMABooksDB/mySqlSettings.json
+/MMABooksTools/mySqlSettings.json
+/MMABooksTools/bin/Debug/net6.0/mySqlSettings.json
+/MMABooksTools/bin/Debug/net6.0/mySqlSettings.json
+/MMABooksTests/bin/Debug/net6.0/mySqlSettings.json
