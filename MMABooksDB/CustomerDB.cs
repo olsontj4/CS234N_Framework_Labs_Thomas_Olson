@@ -21,7 +21,7 @@ namespace MMABooksDB
 {
     public class CustomerDB
     {
-        /*
+/*
         public IBaseProps Create(IBaseProps p)
         {
             int rowsAffected = 0;
@@ -32,10 +32,10 @@ namespace MMABooksDB
             command.CommandType = CommandType.StoredProcedure;
             command.Parameters.Add("custId", DBDbType.Int32);
             command.Parameters.Add("name_p", DBDbType.VarChar);
-            ... there are more parameters here
+            //... there are more parameters here
             command.Parameters[0].Direction = ParameterDirection.Output;
             command.Parameters["name_p"].Value = props.Name;
-            ... and more values here
+            //... and more values here
 
             try
             {
@@ -60,6 +60,6 @@ namespace MMABooksDB
                     mConnection.Close();
             }
         }
-         */
+*/
     }
 }

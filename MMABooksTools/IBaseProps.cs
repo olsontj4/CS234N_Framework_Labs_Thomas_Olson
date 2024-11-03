@@ -13,5 +13,6 @@ namespace MMABooksTools
 
         void SetState(string jsonString);
         void SetState(DBDataReader dr);
+
     }
 }
