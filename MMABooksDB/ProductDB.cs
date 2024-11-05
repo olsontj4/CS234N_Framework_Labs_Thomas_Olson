@@ -7,8 +7,6 @@ using MMABooksProps;
 
 using System.Data;
 
-// *** I use an "alias" for the ado.net classes throughout my code
-// When I switch to an oracle database, I ONLY have to change the actual classes here
 using DBBase = MMABooksTools.BaseSQLDB;
 using DBConnection = MySql.Data.MySqlClient.MySqlConnection;
 using DBCommand = MySql.Data.MySqlClient.MySqlCommand;
@@ -19,37 +17,31 @@ using DBDbType = MySql.Data.MySqlClient.MySqlDbType;
 
 namespace MMABooksDB
 {
-    public class CustomerDB : DBBase, IReadDB, IWriteDB
+    public class ProductDB : DBBase, IReadDB, IWriteDB
     {
         public IBaseProps Create(IBaseProps p)
         {
             int rowsAffected = 0;
-            CustomerProps props = (CustomerProps)p;
-
+            ProductProps props = (ProductProps)p;
             DBCommand command = new DBCommand();
-            command.CommandText = "usp_CustomerCreate";
+            command.CommandText = "usp_ProductCreate";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add("custId", DBDbType.Int32);
-            command.Parameters.Add("name_p", DBDbType.VarChar);
-            command.Parameters.Add("address_p", DBDbType.VarChar);
-            command.Parameters.Add("city_p", DBDbType.VarChar);
-            command.Parameters.Add("state_p", DBDbType.VarChar);
-            command.Parameters.Add("zipCode_p", DBDbType.VarChar);
-            //... there are more parameters here
+            command.Parameters.Add("prodID", DBDbType.Int32);
+            command.Parameters.Add("productCode_p", DBDbType.VarChar);
+            command.Parameters.Add("description_p", DBDbType.VarChar);
+            command.Parameters.Add("unitPrice_p", DBDbType.Decimal);
+            command.Parameters.Add("onHandQuantity_p", DBDbType.Int32);
             command.Parameters[0].Direction = ParameterDirection.Output;
-            command.Parameters["name_p"].Value = props.Name;
-            command.Parameters["address_p"].Value = props.Address;
-            command.Parameters["city_p"].Value = props.City;
-            command.Parameters["state_p"].Value = props.State;
-            command.Parameters["zipCode_p"].Value = props.ZipCode;
-            //... and more values here
-
+            command.Parameters["productCode_p"].Value = props.ProductCode;
+            command.Parameters["description_p"].Value = props.Description;
+            command.Parameters["unitPrice_p"].Value = props.UnitPrice;
+            command.Parameters["onHandQuantity_p"].Value = props.OnHandQuantity;
             try
             {
                 rowsAffected = RunNonQueryProcedure(command);
                 if (rowsAffected == 1)
                 {
-                    props.CustomerID = (int)command.Parameters[0].Value;
+                    props.ProductID = (int)command.Parameters[0].Value;
                     props.ConcurrencyID = 1;
                     return props;
                 }
@@ -58,7 +50,6 @@ namespace MMABooksDB
             }
             catch (Exception e)
             {
-                // log this error
                 throw;
             }
             finally
@@ -67,20 +58,17 @@ namespace MMABooksDB
                     mConnection.Close();
             }
         }
-
         public bool Delete(IBaseProps p)
         {
-            CustomerProps props = (CustomerProps)p;
+            ProductProps props = (ProductProps)p;
             int rowsAffected = 0;
-
             DBCommand command = new DBCommand();
-            command.CommandText = "usp_CustomerDelete";
+            command.CommandText = "usp_ProductDelete";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add("custID", DBDbType.Int32);
+            command.Parameters.Add("prodID", DBDbType.Int32);
             command.Parameters.Add("conCurrID", DBDbType.Int32);
-            command.Parameters["custID"].Value = props.CustomerID;
+            command.Parameters["prodID"].Value = props.ProductID;
             command.Parameters["conCurrID"].Value = props.ConcurrencyID;
-
             try
             {
                 rowsAffected = RunNonQueryProcedure(command);
@@ -93,11 +81,9 @@ namespace MMABooksDB
                     string message = "Record cannot be deleted. It has been edited by another user.";
                     throw new Exception(message);
                 }
-
             }
             catch (Exception e)
             {
-                // log this exception
                 throw;
             }
             finally
@@ -106,18 +92,15 @@ namespace MMABooksDB
                     mConnection.Close();
             }
         }
-
         public IBaseProps Retrieve(object key)
         {
             DBDataReader data = null;
-            CustomerProps props = new CustomerProps();
+            ProductProps props = new ProductProps();
             DBCommand command = new DBCommand();
-
-            command.CommandText = "usp_CustomerSelect";
+            command.CommandText = "usp_ProductSelect";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add("custID", DBDbType.Int32);
-            command.Parameters["custID"].Value = (int)key;
-
+            command.Parameters.Add("productCode_p", DBDbType.VarChar);
+            command.Parameters["productCode_p"].Value = key.ToString();
             try
             {
                 data = RunProcedure(command);
@@ -134,7 +117,6 @@ namespace MMABooksDB
             }
             catch (Exception e)
             {
-                // log this exception
                 throw;
             }
             finally
@@ -146,21 +128,19 @@ namespace MMABooksDB
                 }
             }
         }
-
         public object RetrieveAll()
         {
-            List<CustomerProps> list = new List<CustomerProps>();
+            List<ProductProps> list = new List<ProductProps>();
             DBDataReader reader = null;
-            CustomerProps props;
-
+            ProductProps props;
             try
             {
-                reader = RunProcedure("usp_CustomerSelectAll");
+                reader = RunProcedure("usp_ProductSelectAll");
                 if (!reader.IsClosed)
                 {
                     while (reader.Read())
                     {
-                        props = new CustomerProps();
+                        props = new ProductProps();
                         props.SetState(reader);
                         list.Add(props);
                     }
@@ -169,7 +149,6 @@ namespace MMABooksDB
             }
             catch (Exception e)
             {
-                // log this exception
                 throw;
             }
             finally
@@ -180,30 +159,26 @@ namespace MMABooksDB
                 }
             }
         }
-
         public bool Update(IBaseProps p)
         {
             int rowsAffected = 0;
-            CustomerProps props = (CustomerProps)p;
+            ProductProps props = (ProductProps)p;
 
             DBCommand command = new DBCommand();
-            command.CommandText = "usp_CustomerUpdate";
+            command.CommandText = "usp_ProductUpdate";
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.Add("custID", DBDbType.Int32);
-            command.Parameters.Add("name_p", DBDbType.VarChar);
-            command.Parameters.Add("address_p", DBDbType.VarChar);
-            command.Parameters.Add("city_p", DBDbType.VarChar);
-            command.Parameters.Add("state_p", DBDbType.VarChar);
-            command.Parameters.Add("zipCode_p", DBDbType.VarChar);
+            command.Parameters.Add("prodID", DBDbType.Int32);
+            command.Parameters.Add("productCode_p", DBDbType.VarChar);
+            command.Parameters.Add("description_p", DBDbType.VarChar);
+            command.Parameters.Add("unitPrice_p", DBDbType.Decimal);
+            command.Parameters.Add("onHandQuantity_p", DBDbType.Int32);
             command.Parameters.Add("conCurrID", DBDbType.Int32);
-            command.Parameters["custID"].Value = props.CustomerID;
-            command.Parameters["name_p"].Value = props.Name;
-            command.Parameters["address_p"].Value = props.Address;
-            command.Parameters["city_p"].Value = props.City;
-            command.Parameters["state_p"].Value = props.State;
-            command.Parameters["zipCode_p"].Value = props.ZipCode;
+            command.Parameters["prodID"].Value = props.ProductID;
+            command.Parameters["productCode_p"].Value = props.ProductCode;
+            command.Parameters["description_p"].Value = props.Description;
+            command.Parameters["unitPrice_p"].Value = props.UnitPrice;
+            command.Parameters["onHandQuantity_p"].Value = props.OnHandQuantity;
             command.Parameters["conCurrID"].Value = props.ConcurrencyID;
-
             try
             {
                 rowsAffected = RunNonQueryProcedure(command);
@@ -220,7 +195,6 @@ namespace MMABooksDB
             }
             catch (Exception e)
             {
-                // log this exception
                 throw;
             }
             finally

@@ -121,14 +121,14 @@ namespace MMABooksTests
         [Test]
         public void TestConcurrencyIssue()
         {
-            State s1 = new State("OR");
-            State s2 = new State("OR");
+            State c1 = new State("OR");
+            State c2 = new State("OR");
 
-            s1.Name = "Updated first";
-            s1.Save();
+            c1.Name = "Updated first";
+            c1.Save();
 
-            s2.Name = "Updated second";
-            Assert.Throws<Exception>(() => s2.Save());
+            c2.Name = "Updated second";
+            Assert.Throws<Exception>(() => c2.Save());
         }
     }
 }
